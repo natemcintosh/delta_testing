@@ -1,7 +1,11 @@
-from datetime import date
+import typing
+from pathlib import Path
+from datetime import date, datetime
 
 import polars as pl
 import numpy as np
+
+from delta_testing.states import states
 
 
 def create_random_data(
@@ -22,8 +26,10 @@ def create_random_data(
     Columns are:
     - event_date: date
     - report_date: date
-    - sex: pl.Categorical
+    - received_on: datetime
+    - sex: str
     - age: int
+    - state: str
     - value: int
     """
     rng = np.random.default_rng(seed=seed)
@@ -46,19 +52,25 @@ def create_random_data(
     # Create final columns
     sex = rng.choice(["M", "F"], size=n_rows)
     age = rng.integers(low=0, high=110, size=n_rows)
+    state = rng.choice(states, size=n_rows)
     values = rng.lognormal(mean=10, sigma=2, size=n_rows).astype(int)
 
-    return (
-        pl.DataFrame(
-            dict(
-                event_date=event_dates,
-                report_date=report_dates,
-                sex=sex,
-                age=age,
-                values=values,
-            )
+    return pl.DataFrame(
+        dict(
+            event_date=event_dates,
+            report_date=report_dates,
+            received_on=datetime.today(),
+            sex=sex,
+            age=age,
+            state=state,
+            values=values,
         )
-        # Make sex a category
-        .with_columns(pl.col.sex.cast(pl.Categorical))
-        .sort(["event_date", "report_date"])
-    )
+    ).sort(["event_date", "report_date"])
+
+
+def save_to_delta(
+    df: pl.DataFrame,
+    path: str | Path = "~/Desktop/data/delta_testing",
+    mode: typing.Literal["error", "append", "overwrite", "ignore"] = "append",
+):
+    df.write_delta(path, mode=mode)
