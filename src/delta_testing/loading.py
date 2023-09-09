@@ -10,8 +10,8 @@ def read_as_of(path: str | Path, asof: date, grouping_cols: list[str]) -> pl.Laz
 
     When getting the reports closest to `asof`, will group by `grouping_cols` if any.
     Examples of `grouping_cols` might be:
-    - ["state", "event_date"]
-    - ["geo_value", "date"]
+    - `["state", "event_date"]`
+    - `["geo_value", "date"]`
 
     NOTE: The LazyFrame returned will be sorted by the grouping columns, in the order
     they are passed in.
