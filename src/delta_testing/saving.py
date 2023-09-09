@@ -1,4 +1,4 @@
-from datetime import date, timedelta
+from datetime import date
 
 import polars as pl
 import numpy as np
